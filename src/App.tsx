@@ -368,18 +368,28 @@ export default function App() {
 
     setLoading(true);
     const data = await googleSheetsService.getQuestions(student.subjectCombination);
-    
-    // Apply shuffling if enabled
-    let finalQuestions = [...data];
+    const uniqueMap = new Map();
+    data.forEach(q => {
+      const key = `${q.subject}_${String(q.text || '').trim().toLowerCase()}`;
+      if (!uniqueMap.has(key)) uniqueMap.set(key, q);
+    });
+    const dataPool = Array.from(uniqueMap.values());
+
+    let finalQuestionsPool = [...dataPool];
     if (settings?.shuffling) {
-      finalQuestions = finalQuestions.sort(() => Math.random() - 0.5);
+      // Fisher-Yates
+      for (let i = finalQuestionsPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [finalQuestionsPool[i], finalQuestionsPool[j]] = [finalQuestionsPool[j], finalQuestionsPool[i]];
+      }
     }
     
     // Apply subject-specific question counts
+    let finalQuestions = finalQuestionsPool;
     if (settings?.questionsPerSubject) {
       // Group by subject and take a subset
       const grouped: Record<string, Question[]> = {};
-      finalQuestions.forEach(q => {
+      finalQuestionsPool.forEach(q => {
         if (!grouped[q.subject]) grouped[q.subject] = [];
         grouped[q.subject].push(q);
       });
@@ -411,9 +421,23 @@ export default function App() {
         }
 
         const finalCount = count || globalCount;
-        const shuffled = settings.shuffling ? [...qs].sort(() => Math.random() - 0.5) : qs;
-        return shuffled.slice(0, finalCount);
+        const shuffledSub = [...qs];
+        if (settings?.shuffling) {
+          for (let i = shuffledSub.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledSub[i], shuffledSub[j]] = [shuffledSub[j], shuffledSub[i]];
+          }
+        }
+        return shuffledSub.slice(0, finalCount);
       });
+
+      // Final reshuffle of all subjects together
+      if (settings?.shuffling) {
+        for (let i = finalQuestions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [finalQuestions[i], finalQuestions[j]] = [finalQuestions[j], finalQuestions[i]];
+        }
+      }
     }
 
     setQuestions(finalQuestions);
