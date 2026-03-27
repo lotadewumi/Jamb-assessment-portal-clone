@@ -1,0 +1,5 @@
+{
+  "name": "JAMB Assessment Portal",
+  "description": "A comprehensive Computer Based Test (CBT) portal for JAMB assessments, featuring candidate login, registration verification, exam instructions, and a real-time examination environment.",
+  "requestFramePermissions": []
+}
