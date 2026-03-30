@@ -422,24 +422,47 @@ export default function App() {
     return () => clearInterval(interval);
   }, [screen]);
 
-  // Simple "routing" for specific pages
+  // Optimized routing for refresh stability and subfolder support
   useEffect(() => {
     const checkRoute = () => {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
       
-      if (path === '/admin' || path === '/admin/' || hash === '#/admin') {
+      // Admin Logic
+      if (path.endsWith('/admin') || path.endsWith('/admin/') || hash === '#/admin') {
         setScreen('admin');
-      } else if (path === '/center' || path === '/center/' || hash === '#/center') {
+        return;
+      } 
+      
+      // Center Dashboard Logic
+      if (path.endsWith('/center') || path.endsWith('/center/') || hash === '#/center' || hash === '#/center-dashboard') {
         if (!center) {
+           // On refresh, center state is lost, so we must go to login
            setScreen('login');
+           if (hash) window.location.hash = ''; // Clear hash if not logged in
         } else {
            setScreen('center-dashboard');
         }
-      } else if (path === '/student-registration' || hash === '#/student-registration' || hash === '#/new-student') {
+        return;
+      } 
+      
+      // Student Registration Logic
+      if (path.endsWith('/student-registration') || hash === '#/student-registration' || hash === '#/new-student') {
         setScreen('student-register');
-      } else if (path === '/tutorial-registration' || hash === '#/tutorial-registration' || hash === '#/center-registration') {
+        return;
+      } 
+      
+      // Tutorial Center Registration Logic
+      if (path.endsWith('/tutorial-registration') || hash === '#/tutorial-registration' || hash === '#/center-registration') {
         setScreen('tutorial-register');
+        return;
+      }
+
+      // Default to Login if at root or unknown
+      if (hash === '' || hash === '#/' || path === '/' || path.endsWith('index.html')) {
+        // Initial state is already login, but we can be explicit here if needed
+        // Only set if we aren't in an active exam/completed flow
+        setScreen((prev) => (['exam', 'confirm', 'instructions', 'completed'].includes(prev) ? prev : 'login'));
       }
     };
 
