@@ -16,7 +16,9 @@ import {
   Package,
   Loader2,
   CheckCircle2,
-  UserPlus
+  UserPlus,
+  Menu,
+  X 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { googleSheetsService } from '../services/googleSheetsService';
@@ -34,6 +36,7 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Center statistics
   const seatsUsed = students.length;
@@ -143,12 +146,86 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
     };
     reader.readAsText(file);
   };
+  const NavItem = ({ active, onClick, icon, label, badge }: any) => (
+    <button 
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${active ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`}
+    >
+      {icon}
+      {label}
+      {badge && <span className="ml-auto bg-white px-2 py-0.5 rounded-md text-[10px] border border-slate-200">{badge}</span>}
+    </button>
+  );
+
+  const StatCard = ({ icon, label, value, sub, color }: any) => (
+    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+      <div className="flex items-center gap-4 mb-4">
+        <div className={`p-3 rounded-2xl bg-${color}-50`}>{icon}</div>
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+          <p className="text-2xl font-black text-slate-900">{value}</p>
+        </div>
+      </div>
+      <p className="text-xs font-bold text-slate-400">{sub}</p>
+    </div>
+  );
+
+  const ActionBtn = ({ icon, label, sub, onClick, disabled }: any) => (
+    <button 
+      onClick={onClick}
+      disabled={disabled}
+      className={`w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-all text-left ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      <div className="p-3 bg-slate-100 rounded-xl text-slate-600">{icon}</div>
+      <div>
+        <p className="text-sm font-black text-slate-900">{label}</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{sub}</p>
+      </div>
+    </button>
+  );
+
+  const NavItemWithClose = (props: any) => (
+    <NavItem {...props} onClick={() => { props.onClick(); setMobileMenuOpen(false); }} />
+  );
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] overflow-hidden">
+    <div className="flex h-screen bg-[#f8fafc] overflow-hidden relative">
+      {/* Mobile Top Bar */}
+      <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-[#e2e8f0] sticky top-0 z-40 w-full">
+        <div className="flex items-center gap-2">
+           <div className="w-8 h-8 bg-[#004d27] rounded-lg flex items-center justify-center">
+             <Building2 className="w-5 h-5 text-white" />
+           </div>
+           <h1 className="font-black text-xs text-[#004d27] uppercase tracking-tight">Center Hub</h1>
+        </div>
+        <button 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* Overlay for mobile navigation */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-[#e2e8f0] flex flex-col shrink-0">
-        <div className="p-6 border-b border-[#f1f5f9] flex items-center gap-3">
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white border-r border-[#e2e8f0] flex flex-col shrink-0
+        transform transition-transform duration-300 ease-in-out
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-6 border-b border-[#f1f5f9] hidden lg:flex items-center gap-3">
           <div className="w-10 h-10 bg-[#004d27] rounded-xl flex items-center justify-center shadow-lg shadow-[#004d27]/20">
             <Building2 className="w-6 h-6 text-white" />
           </div>
@@ -158,27 +235,38 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
           </div>
         </div>
 
+        {/* Mobile Sidebar Header */}
+        <div className="lg:hidden p-6 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
+             <Building2 className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="font-black text-slate-900">Hub Menu</h2>
+            <p className="text-[10px] text-slate-400 font-bold uppercase">{center?.centerName?.substring(0, 20)}</p>
+          </div>
+        </div>
+
         <nav className="flex-grow p-4 space-y-2">
-          <NavItem 
+          <NavItemWithClose 
             active={activeTab === 'overview'} 
             onClick={() => setActiveTab('overview')} 
             icon={<LayoutDashboard className="w-5 h-5" />} 
             label="Overview" 
           />
-          <NavItem 
+          <NavItemWithClose 
             active={activeTab === 'students'} 
             onClick={() => setActiveTab('students')} 
             icon={<Users className="w-5 h-5" />} 
             label="My Students" 
             badge={students.length.toString()}
           />
-          <NavItem 
+          <NavItemWithClose 
             active={activeTab === 'questions'} 
             onClick={() => setActiveTab('questions')} 
             icon={<BookOpen className="w-5 h-5" />} 
             label="Question Bank" 
           />
-          <NavItem 
+          <NavItemWithClose 
             active={activeTab === 'settings'} 
             onClick={() => setActiveTab('settings')} 
             icon={<Settings className="w-5 h-5" />} 
@@ -189,49 +277,45 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
         <div className="p-4 border-t border-[#f1f5f9]">
           <button 
             onClick={onBack}
-            className="w-full flex items-center gap-3 px-4 py-3 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold text-xs uppercase tracking-wider"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all"
           >
             <LogOut className="w-5 h-5" />
-            Exit Terminal
+            Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
-        <header className="h-20 bg-white border-b border-[#e2e8f0] flex items-center justify-between px-8 shrink-0">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">
-              {activeTab === 'overview' && 'Dashboard Overview'}
-              {activeTab === 'students' && 'Enrolled Students'}
-              {activeTab === 'questions' && 'Question Management'}
-              {activeTab === 'settings' && 'Center Settings'}
-            </h2>
-          </div>
+      <main className="flex-grow overflow-y-auto w-full scroll-smooth">
+        <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-10">
+          <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div className="flex items-center gap-4">
+               <div className="hidden lg:flex w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 items-center justify-center group hover:border-emerald-300 transition-colors">
+                  <LayoutDashboard className="w-6 h-6 text-emerald-600 group-hover:scale-110 transition-transform" />
+               </div>
+               <div>
+                  <h2 className="text-2xl md:text-4xl font-black text-[#1e293b] tracking-tight lowercase first-letter:uppercase">
+                    {activeTab === 'overview' ? 'Dashboard' : 
+                     activeTab === 'students' ? 'Student Roster' : 
+                     activeTab === 'questions' ? 'Questions' : 'Preferences'}
+                  </h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verified Hub</span>
+                  </div>
+               </div>
+            </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end mr-4">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Status</span>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-bold text-gray-700">Verified Hub</span>
+            <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm self-start md:self-center">
+              <div className="text-right hidden sm:block">
+                <p className="text-xs font-black text-slate-900 tracking-tight">Lead Administrator</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Coordinator</p>
+              </div>
+              <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center font-black text-emerald-700">
+                {center?.coordinatorName?.charAt(0) || 'L'}
               </div>
             </div>
-            
-            <div className="h-10 w-[1px] bg-gray-100 hidden md:block"></div>
-            
-            <div className="hidden md:flex items-center gap-3 pl-2">
-              <div className="text-right">
-                <p className="text-xs font-bold text-slate-900">{center?.coordinatorName}</p>
-                <p className="text-[10px] text-slate-400 font-medium">Coordinator</p>
-              </div>
-              <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100 italic font-black text-emerald-700 text-sm">
-                {center?.coordinatorName?.charAt(0) || 'C'}
-              </div>
-            </div>
-          </div>
-        </header>
+          </header>
 
         {/* Content Area */}
         <div className="flex-grow overflow-y-auto p-8 bg-[#f8fafc]">
@@ -632,6 +716,94 @@ const StatCard = ({ icon, label, value, sub, color }: {
     <div className="space-y-1">
       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
       <p className="text-3xl font-black text-slate-900 leading-tight">{value}</p>
+      <p className="text-xs font-bold text-slate-500">{sub}</p>
+    </div>
+  </div>
+);
+
+const ActionBtn = ({ icon, label, sub, onClick, disabled }: { 
+  icon: React.ReactNode, 
+  label: string, 
+  sub: string, 
+  onClick?: () => void,
+  disabled?: boolean
+}) => (
+  <button 
+    onClick={onClick}
+    disabled={disabled}
+    className={`flex items-center gap-4 p-4 rounded-2xl border border-slate-100 transition-all text-left w-full group ${
+      disabled ? 'opacity-40 cursor-not-allowed' : 'hover:border-emerald-200 hover:bg-emerald-50/50 hover:shadow-lg hover:shadow-emerald-600/5'
+    }`}
+  >
+    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+      disabled ? 'bg-gray-100 text-gray-400' : 'bg-slate-50 text-slate-400 group-hover:bg-emerald-600 group-hover:text-white'
+    }`}>
+      {icon}
+    </div>
+    <div>
+      <p className={`text-sm font-black tracking-tight transition-colors ${disabled ? 'text-gray-400' : 'text-slate-900 group-hover:text-emerald-800'}`}>{label}</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">{sub}</p>
+    </div>
+  );
+};
+
+const NavItem = ({ active, onClick, icon, label, badge, tag }: { 
+  active: boolean, 
+  onClick: () => void, 
+  icon: React.ReactNode, 
+  label: string,
+  badge?: string,
+  tag?: string
+}) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
+      active 
+        ? 'bg-emerald-50 text-[#004d27] shadow-sm shadow-emerald-600/5' 
+        : 'text-slate-500 hover:bg-slate-50'
+    }`}
+  >
+    <div className="flex items-center gap-3">
+      <div className={active ? 'text-[#004d27]' : 'text-slate-400'}>
+        {icon}
+      </div>
+      <span className={`text-sm tracking-tight ${active ? 'font-black' : 'font-bold'}`}>{label}</span>
+    </div>
+    <div className="flex items-center gap-2">
+      {badge && (
+        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
+          active ? 'bg-[#004d27] text-white' : 'bg-slate-100 text-slate-500'
+        }`}>
+          {badge}
+        </span>
+      )}
+      {tag && (
+        <span className="px-1.5 py-0.5 bg-slate-100 text-slate-400 text-[8px] font-black uppercase rounded tracking-widest">
+          {tag}
+        </span>
+      )}
+    </div>
+  </button>
+);
+
+const StatCard = ({ icon, label, value, sub, color }: { 
+  icon: React.ReactNode, 
+  label: string, 
+  value: string | number, 
+  sub: string,
+  color: 'blue' | 'emerald' | 'amber'
+}) => (
+  <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
+      color === 'blue' ? 'bg-blue-50' : 
+      color === 'emerald' ? 'bg-emerald-50' : 
+      'bg-amber-50'
+    }`}>
+      {icon}
+    </div>
+    <div className="space-y-1">
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+      <p className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">{value}</p>
       <p className="text-xs font-bold text-slate-500">{sub}</p>
     </div>
   </div>
