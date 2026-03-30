@@ -86,7 +86,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
     const lines = text.split('\n');
     if (lines.length < 2) return [];
     
-    // Simple CSV parser that handles quotes
     const parseLine = (line: string) => {
       const result = [];
       let cur = '';
@@ -146,6 +145,7 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
     };
     reader.readAsText(file);
   };
+
   const NavItemWithClose = (props: any) => (
     <NavItem {...props} onClick={() => { props.onClick(); setMobileMenuOpen(false); }} />
   );
@@ -194,17 +194,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
           <div className="overflow-hidden">
             <h1 className="font-black text-sm text-[#004d27] truncate uppercase tracking-tight">Center Hub</h1>
             <p className="text-[10px] text-gray-500 font-bold uppercase truncate">{center?.centerName || 'Tutorial Center'}</p>
-          </div>
-        </div>
-
-        {/* Mobile Sidebar Header */}
-        <div className="lg:hidden p-6 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
-             <Building2 className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="font-black text-slate-900">Hub Menu</h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase">{center?.centerName?.substring(0, 20)}</p>
           </div>
         </div>
 
@@ -279,8 +268,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
             </div>
           </header>
 
-        {/* Content Area */}
-        <div className="flex-grow overflow-y-auto p-8 bg-[#f8fafc]">
           <AnimatePresence mode="wait">
             {activeTab === 'overview' && (
               <motion.div 
@@ -289,7 +276,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-8"
               >
-                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <StatCard 
                     icon={<Package className="w-6 h-6 text-blue-600" />} 
@@ -314,9 +300,7 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                   />
                 </div>
 
-                {/* Main Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Quota Progress */}
                   <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <h3 className="font-black text-[#1e293b] text-lg mb-6 tracking-tight flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-emerald-600" />
@@ -356,16 +340,15 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                     </div>
                   </div>
 
-                  {/* Quick Actions */}
                   <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <h3 className="font-black text-[#1e293b] text-lg mb-6 tracking-tight">Quick Operations</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <ActionBtn 
-                          icon={<UserPlus className="w-5 h-5" />} 
-                          label="Enroll Student" 
-                          sub="Add manually"
-                          onClick={onAddStudent}
-                        />
+                      <ActionBtn 
+                        icon={<UserPlus className="w-5 h-5" />} 
+                        label="Enroll Student" 
+                        sub="Add manually"
+                        onClick={onAddStudent}
+                      />
                       <ActionBtn 
                         icon={<Package className="w-5 h-5" />} 
                         label="Bulk Upload" 
@@ -458,10 +441,7 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                            <button 
-                              className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"
-                              title="View Details"
-                            >
+                              <button className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="View Details">
                                 <ChevronRight className="w-5 h-5" />
                               </button>
                             </td>
@@ -490,7 +470,7 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                 className="space-y-6"
               >
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                  <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+                  <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-grow">
                       <div className="relative max-w-sm w-full">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -553,7 +533,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                 className="grid grid-cols-1 lg:grid-cols-3 gap-8"
               >
                 <div className="lg:col-span-2 space-y-6">
-                  {/* Center Identity */}
                   <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <h3 className="font-black text-[#1e293b] text-lg mb-6 tracking-tight">Institutional Profile</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -567,7 +546,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                     </div>
                   </div>
 
-                  {/* Quota Details */}
                   <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <h3 className="font-black text-[#1e293b] text-lg mb-6 tracking-tight">Deployment & Quota</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -580,7 +558,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
                 </div>
 
                 <div className="space-y-6">
-                  {/* Token Status */}
                   <div className="bg-[#004d27] p-8 rounded-3xl shadow-xl shadow-[#004d27]/20 text-white overflow-hidden relative">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                        <ShieldCheck className="w-24 h-24" />
@@ -623,92 +600,7 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
   );
 };
 
-const NavItem = ({ active, onClick, icon, label, badge, tag }: { 
-  active: boolean, 
-  onClick: () => void, 
-  icon: React.ReactNode, 
-  label: string,
-  badge?: string,
-  tag?: string
-}) => (
-  <button 
-    onClick={onClick}
-    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
-      active 
-        ? 'bg-emerald-50 text-[#004d27] shadow-sm shadow-emerald-600/5' 
-        : 'text-slate-500 hover:bg-slate-50'
-    }`}
-  >
-    <div className="flex items-center gap-3">
-      <div className={active ? 'text-[#004d27]' : 'text-slate-400'}>
-        {icon}
-      </div>
-      <span className={`text-sm tracking-tight ${active ? 'font-black' : 'font-bold'}`}>{label}</span>
-    </div>
-    {badge && (
-      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
-        active ? 'bg-[#004d27] text-white' : 'bg-slate-100 text-slate-500'
-      }`}>
-        {badge}
-      </span>
-    )}
-    {tag && (
-      <span className="px-1.5 py-0.5 bg-slate-100 text-slate-400 text-[8px] font-black uppercase rounded tracking-widest">
-        {tag}
-      </span>
-    )}
-  </button>
-);
-
-const StatCard = ({ icon, label, value, sub, color }: { 
-  icon: React.ReactNode, 
-  label: string, 
-  value: string | number, 
-  sub: string,
-  color: 'blue' | 'emerald' | 'amber'
-}) => (
-  <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
-      color === 'blue' ? 'bg-blue-50' : 
-      color === 'emerald' ? 'bg-emerald-50' : 
-      'bg-amber-50'
-    }`}>
-      {icon}
-    </div>
-    <div className="space-y-1">
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-      <p className="text-3xl font-black text-slate-900 leading-tight">{value}</p>
-      <p className="text-xs font-bold text-slate-500">{sub}</p>
-    </div>
-  </div>
-);
-
-const ActionBtn = ({ icon, label, sub, onClick, disabled }: { 
-  icon: React.ReactNode, 
-  label: string, 
-  sub: string, 
-  onClick?: () => void,
-  disabled?: boolean
-}) => (
-  <button 
-    onClick={onClick}
-    disabled={disabled}
-    className={`flex items-center gap-4 p-4 rounded-2xl border border-slate-100 transition-all text-left w-full group ${
-      disabled ? 'opacity-40 cursor-not-allowed' : 'hover:border-emerald-200 hover:bg-emerald-50/50 hover:shadow-lg hover:shadow-emerald-600/5'
-    }`}
-  >
-    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-      disabled ? 'bg-gray-100 text-gray-400' : 'bg-slate-50 text-slate-400 group-hover:bg-emerald-600 group-hover:text-white'
-    }`}>
-      {icon}
-    </div>
-    <div>
-      <p className={`text-sm font-black tracking-tight transition-colors ${disabled ? 'text-gray-400' : 'text-slate-900 group-hover:text-emerald-800'}`}>{label}</p>
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">{sub}</p>
-    </div>
-  );
-};
-
+// Sub-components defined outside for better performance and organization
 const NavItem = ({ active, onClick, icon, label, badge, tag }: { 
   active: boolean, 
   onClick: () => void, 
