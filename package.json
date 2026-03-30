@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://lotadewumi.github.io/Jamb-assessment-portal-clone/",
+  "homepage": "https://grandgeniusresultchecker.name.ng/",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "predeploy": "npm run build",

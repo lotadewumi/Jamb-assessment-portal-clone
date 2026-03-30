@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Student, ExamSettings, Question, ExamResult } from '../types';
+import { Student, ExamSettings, Question, ExamResult, PaymentLog, TutorialCenter } from '../types';
 
 const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL?.replace(/\/$/, '');
 
@@ -31,13 +31,22 @@ export const googleSheetsService = {
         return undefined;
       };
 
+      const rawHistory = getVal(['allAttemptedQuestionIds', 'history', 'attemptedQuestions']) || '';
+      let allAttemptedQuestionIds: string[] = [];
+      if (Array.isArray(rawHistory)) {
+        allAttemptedQuestionIds = rawHistory.map(String);
+      } else if (typeof rawHistory === 'string' && rawHistory.trim()) {
+        allAttemptedQuestionIds = rawHistory.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
       return {
         name: getVal(['name', 'Name', 'Full Name', 'Student Name']) || '',
         dob: getVal(['dob', 'DOB', 'Date of Birth', 'DateOfBirth']) || '',
         regNo: getVal(['regNo', 'RegNo', 'Registration Number', 'Reg Number']) || regNo,
         subjectCombination: Array.isArray(data.subjectCombination) ? data.subjectCombination : 
                             (getVal(['subjectCombination', 'Subject Combination', 'Subjects']) || '').split(',').map((s: string) => s.trim()).filter(Boolean),
-        photograph: getVal(['photograph', 'Photograph', 'Photo', 'Image', 'Picture', 'Profile Picture', 'Student Picture']) || ''
+        photograph: getVal(['photograph', 'Photograph', 'Photo', 'Image', 'Picture', 'Profile Picture', 'Student Picture']) || '',
+        allAttemptedQuestionIds
       };
     } catch (error) {
       console.error('Error fetching student:', error);
@@ -156,7 +165,8 @@ export const googleSheetsService = {
       const standardKeys = [
         'examTitle', 'totalDuration', 'subjectDuration', 'questionsPerSubject', 
         'activeSubjects', 'startTime', 'endTime', 'instructions', 
-        'randomSelection', 'shuffling', 'tabMonitoring'
+        'randomSelection', 'shuffling', 'tabMonitoring', 'showResultsAfterExam',
+        'isLocked', 'lockMessage'
       ];
 
       const result: ExamSettings = {
@@ -170,7 +180,15 @@ export const googleSheetsService = {
         instructions: getVal(['instructions', 'Instructions', 'Guidelines']) || '',
         randomSelection: getVal(['randomSelection', 'Random Selection', 'Randomize']) === true || getVal(['randomSelection', 'Random Selection', 'Randomize']) === 'TRUE',
         shuffling: getVal(['shuffling', 'Shuffling', 'Shuffle']) === true || getVal(['shuffling', 'Shuffling', 'Shuffle']) === 'TRUE',
-        tabMonitoring: getVal(['tabMonitoring', 'Tab Monitoring', 'Monitor Tabs']) === true || getVal(['tabMonitoring', 'Tab Monitoring', 'Monitor Tabs']) === 'TRUE'
+        tabMonitoring: getVal(['tabMonitoring', 'Tab Monitoring', 'Monitor Tabs']) === true || getVal(['tabMonitoring', 'Tab Monitoring', 'Monitor Tabs']) === 'TRUE',
+        showResultsAfterExam: ['true', 'TRUE', 'yes', 'YES', true, 1].includes(getVal(['showResultsAfterExam', 'Show Results After Exam']) as any),
+        isLocked: ['true', 'TRUE', 'yes', 'YES', true, 1].includes(getVal(['isLocked', 'Lock Exam', 'Locked']) as any),
+        lockMessage: getVal(['lockMessage', 'Lock Message', 'Custom Lock Message']) || 'This exam is currently locked by the administrator.',
+        studentRegEnabled: getVal(['studentRegEnabled', 'Student Registration Enabled']) !== false && getVal(['studentRegEnabled', 'Student Registration Enabled']) !== 'FALSE',
+        tutorialRegEnabled: getVal(['tutorialRegEnabled', 'Tutorial Registration Enabled']) !== false && getVal(['tutorialRegEnabled', 'Tutorial Registration Enabled']) !== 'FALSE',
+        studentRegFee: parseInt(getVal(['studentRegFee', 'Student Registration Fee']) || '1500', 10),
+        tutorialBaseFee: parseInt(getVal(['tutorialBaseFee', 'Tutorial Base Fee']) || '1000', 10),
+        discountTiers: parseJSON(getVal(['discountTiers', 'Discount Tiers'])) || []
       };
 
       // Collect unrecognized numeric keys as subject question counts
@@ -241,12 +259,8 @@ export const googleSheetsService = {
       action: 'saveResult' 
     };
 
-    // Flatten scores for easier handling in Google Sheets
-    if (result.scores) {
-      Object.entries(result.scores).forEach(([subject, score]) => {
-        payload[`score_${subject.replace(/\s+/g, '_')}`] = score;
-      });
-    }
+    // The scores object will be sent as a single stringified JSON in the 'scores' parameter
+    // instead of being flattened into separate columns.
 
     const params = new URLSearchParams();
     Object.entries(payload).forEach(([key, value]) => {
@@ -314,4 +328,125 @@ export const googleSheetsService = {
 
     return false;
   },
+
+  async registerStudent(details: any): Promise<{ success: boolean, message?: string }> {
+    if (!SCRIPT_URL) return { success: false };
+    try {
+      const response = await axiosInstance.post(SCRIPT_URL, JSON.stringify({
+        action: 'registerStudent',
+        ...details
+      }), {
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      });
+      return response.data || { success: false };
+    } catch (error) {
+      console.error('Error registering student:', error);
+      return { success: false };
+    }
+  },
+
+  async getSubjects(): Promise<string[]> {
+    if (!SCRIPT_URL) return [];
+    try {
+      console.log('Fetching subjects from backend...');
+      const response = await axiosInstance.get(`${SCRIPT_URL}?action=getSubjects`);
+      console.log('Raw subjects response:', response.data);
+      
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else if (response.data && typeof response.data === 'object') {
+        // Handle case where it might be wrapped in a 'data' property
+        if (Array.isArray(response.data.data)) return response.data.data;
+        if (response.data.error) {
+          console.error('Backend returned error during getSubjects:', response.data.error);
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching subjects:', error);
+      return [];
+    }
+  },
+
+  async registerTutorialCenter(details: any): Promise<boolean> {
+    if (!SCRIPT_URL) return false;
+    try {
+      const response = await axiosInstance.post(SCRIPT_URL, JSON.stringify({
+        action: 'registerTutorialCenter',
+        ...details
+      }), {
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      });
+      return response.data?.success || false;
+    } catch (error) {
+      console.error('Error registering tutorial center:', error);
+      return false;
+    }
+  },
+
+  async getPaymentLogs(): Promise<PaymentLog[]> {
+    if (!SCRIPT_URL) return [];
+    try {
+      const response = await axiosInstance.get(`${SCRIPT_URL}?action=getPaymentLogs`);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching payment logs:', error);
+      return [];
+    }
+  },
+
+  async updateSettings(settings: Partial<ExamSettings>): Promise<boolean> {
+    if (!SCRIPT_URL) return false;
+    try {
+      const response = await axiosInstance.post(SCRIPT_URL, JSON.stringify({
+        action: 'updateSettings',
+        settings
+      }), {
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      });
+      return response.data?.success || false;
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      return false;
+    }
+  },
+
+  async getTutorialCenter(token: string): Promise<TutorialCenter | null> {
+    if (!SCRIPT_URL) return null;
+    try {
+      const response = await axiosInstance.get(`${SCRIPT_URL}?action=getTutorialCenter&token=${token}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tutorial center:', error);
+      return null;
+    }
+  },
+
+  async getCenterStudents(token: string): Promise<any[]> {
+    if (!SCRIPT_URL) return [];
+    try {
+      const response = await axiosInstance.get(`${SCRIPT_URL}?action=getCenterStudents&token=${token}`);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching center students:', error);
+      return [];
+    }
+  },
+
+  async uploadCenterQuestions(token: string, questions: any[]): Promise<any> {
+    if (!SCRIPT_URL) return { status: 'failed', message: 'Script URL not defined' };
+    try {
+      const response = await axiosInstance.post(SCRIPT_URL, JSON.stringify({ 
+        action: 'uploadCenterQuestions', 
+        token, 
+        questions 
+      }), {
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      });
+      return response.data || { status: 'success' };
+    } catch (error) {
+      console.error('Error uploading center questions:', error);
+      return { status: 'failed' };
+    }
+  }
 };
