@@ -1406,13 +1406,21 @@ function LoginScreen({ onLogin, onCenterLogin, onStudentRegister, onTutorialRegi
       </main>
 
       <footer className="w-full py-4 px-6 bg-gray-50 flex flex-col items-center border-t border-gray-100 shrink-0">
-        <div className="flex items-center gap-2 text-gray-500 mb-1">
-          <UserCircle className="w-3 h-3" />
-          <p className="text-[10px] font-medium">For technical support, contact the center supervisor.</p>
+        <div className="flex flex-col items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 text-gray-500">
+            <UserCircle className="w-3 h-3" />
+            <p className="text-[10px] font-medium">{settings?.supportText || 'For technical support, contact the center supervisor.'}</p>
+          </div>
+          {(settings?.customerServiceEmail || settings?.customerServiceNumber) && (
+            <div className="flex flex-wrap justify-center gap-3">
+              {settings.customerServiceEmail && <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-tighter">{settings.customerServiceEmail}</span>}
+              {settings.customerServiceNumber && <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-tighter">{settings.customerServiceNumber}</span>}
+            </div>
+          )}
         </div>
         <div className="flex gap-4 opacity-40">
-          <span className="text-[8px] font-bold tracking-widest uppercase">System v4.2.0</span>
-          <span className="text-[8px] font-bold tracking-widest uppercase">© 2024 JAMB</span>
+          <span className="text-[8px] font-bold tracking-widest uppercase">{settings?.systemVersion || 'System v4.2.0'}</span>
+          <span className="text-[8px] font-bold tracking-widest uppercase">{settings?.copyrightText || '© 2024 JAMB'}</span>
         </div>
       </footer>
     </div>

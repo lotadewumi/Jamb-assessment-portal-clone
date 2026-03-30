@@ -35,6 +35,9 @@ export interface ExamSettings {
   customerServiceEmail?: string;
   isLocked?: boolean;
   lockMessage?: string;
+  supportText?: string;
+  systemVersion?: string;
+  copyrightText?: string;
 }
 
 export interface PaymentLog {

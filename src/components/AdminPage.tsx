@@ -20,7 +20,8 @@ import {
   ArrowLeft,
   Building2,
   Phone,
-  Mail
+  Mail,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { googleSheetsService } from '../services/googleSheetsService';
@@ -389,12 +390,51 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack, initialSettings, o
                           <input 
                             type="text"
                             value={settings.examTitle}
-                            title="The title shown on the landing page and exam header"
-                            placeholder="e.g. JAMB Mock Assessment 2026"
                             onChange={(e) => setSettings({ ...settings, examTitle: e.target.value })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 font-bold text-lg focus:ring-2 focus:ring-[#004d27]/50 focus:border-[#004d27] outline-none transition-all shadow-sm"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:ring-2 focus:ring-[#004d27]/50 outline-none"
                           />
-                          <p className="mt-2 text-[10px] text-slate-400 ml-1">This title updates the landing page and the header during the exam.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Portal Branding & Footer */}
+                    <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-emerald-600/10 rounded-xl flex items-center justify-center">
+                          <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <h4 className="text-lg font-black text-slate-900 uppercase tracking-wider">Portal Branding & Footer</h4>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Support Instruction</label>
+                          <input 
+                            type="text"
+                            value={settings.supportText || ''}
+                            placeholder="For technical support, contact the center supervisor."
+                            onChange={(e) => setSettings({ ...settings, supportText: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:ring-2 focus:ring-emerald-500/50 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">System Version</label>
+                          <input 
+                            type="text"
+                            value={settings.systemVersion || ''}
+                            placeholder="System v4.2.0"
+                            onChange={(e) => setSettings({ ...settings, systemVersion: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:ring-2 focus:ring-emerald-500/50 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Copyright Notice</label>
+                          <input 
+                            type="text"
+                            value={settings.copyrightText || ''}
+                            placeholder="© 2024 JAMB"
+                            onChange={(e) => setSettings({ ...settings, copyrightText: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:ring-2 focus:ring-emerald-500/50 outline-none"
+                          />
                         </div>
                       </div>
                     </div>
