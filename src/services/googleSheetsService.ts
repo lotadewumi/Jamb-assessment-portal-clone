@@ -166,7 +166,8 @@ export const googleSheetsService = {
         'examTitle', 'totalDuration', 'subjectDuration', 'questionsPerSubject', 
         'activeSubjects', 'startTime', 'endTime', 'instructions', 
         'randomSelection', 'shuffling', 'tabMonitoring', 'showResultsAfterExam',
-        'isLocked', 'lockMessage'
+        'isLocked', 'lockMessage', 'supportText', 'systemVersion', 'copyrightText',
+        'customerServiceEmail', 'customerServiceNumber'
       ];
 
       const result: ExamSettings = {
@@ -188,7 +189,12 @@ export const googleSheetsService = {
         tutorialRegEnabled: getVal(['tutorialRegEnabled', 'Tutorial Registration Enabled']) !== false && getVal(['tutorialRegEnabled', 'Tutorial Registration Enabled']) !== 'FALSE',
         studentRegFee: parseInt(getVal(['studentRegFee', 'Student Registration Fee']) || '1500', 10),
         tutorialBaseFee: parseInt(getVal(['tutorialBaseFee', 'Tutorial Base Fee']) || '1000', 10),
-        discountTiers: parseJSON(getVal(['discountTiers', 'Discount Tiers'])) || []
+        discountTiers: parseJSON(getVal(['discountTiers', 'Discount Tiers'])) || [],
+        supportText: getVal(['supportText', 'Support Instruction', 'Support Message']),
+        systemVersion: getVal(['systemVersion', 'System Version', 'Version Tag']),
+        copyrightText: getVal(['copyrightText', 'Copyright Notice', 'Branding Notice']),
+        customerServiceEmail: getVal(['customerServiceEmail', 'Support Email', 'Contact Email']),
+        customerServiceNumber: getVal(['customerServiceNumber', 'Support Phone', 'Contact Number', 'Customer Service Number'])
       };
 
       // Collect unrecognized numeric keys as subject question counts
