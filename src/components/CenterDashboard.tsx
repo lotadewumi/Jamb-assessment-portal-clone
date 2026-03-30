@@ -146,44 +146,6 @@ export const CenterDashboard: React.FC<CenterDashboardProps> = ({ center, onBack
     };
     reader.readAsText(file);
   };
-  const NavItem = ({ active, onClick, icon, label, badge }: any) => (
-    <button 
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${active ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`}
-    >
-      {icon}
-      {label}
-      {badge && <span className="ml-auto bg-white px-2 py-0.5 rounded-md text-[10px] border border-slate-200">{badge}</span>}
-    </button>
-  );
-
-  const StatCard = ({ icon, label, value, sub, color }: any) => (
-    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-      <div className="flex items-center gap-4 mb-4">
-        <div className={`p-3 rounded-2xl bg-${color}-50`}>{icon}</div>
-        <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-          <p className="text-2xl font-black text-slate-900">{value}</p>
-        </div>
-      </div>
-      <p className="text-xs font-bold text-slate-400">{sub}</p>
-    </div>
-  );
-
-  const ActionBtn = ({ icon, label, sub, onClick, disabled }: any) => (
-    <button 
-      onClick={onClick}
-      disabled={disabled}
-      className={`w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-all text-left ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      <div className="p-3 bg-slate-100 rounded-xl text-slate-600">{icon}</div>
-      <div>
-        <p className="text-sm font-black text-slate-900">{label}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{sub}</p>
-      </div>
-    </button>
-  );
-
   const NavItemWithClose = (props: any) => (
     <NavItem {...props} onClick={() => { props.onClick(); setMobileMenuOpen(false); }} />
   );
